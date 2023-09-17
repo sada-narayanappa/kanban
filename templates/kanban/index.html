@@ -66,8 +66,10 @@
 
 <div class="board">
 <div  class="heading" style="padding: 4px;">
-<input class=inp11 type="text" id="project_title" value="Project Title" >
-<input class=inp11 type="text" id="project_name" value="" placeholder="Project Fie"> 
+<form id="form1" action="">
+<input class=inp11 type="text" id="project_title" required value="Project Title" >
+<input class=inp11 type="text" id="project_name"  required value="" placeholder="Project Fie"> 
+</form>
 </div>
 <div class="lanes" id="content">
     <div class="swim-lane todo" id="todo-lane">
@@ -179,7 +181,7 @@ function save() {
         contents: JSON.stringify(lanes, null, "  ")
     }
     console.log(lanes)
-    callws('/kanban/save/', "", [], ctx)
+    callws('/kanban/save/', "form1", [], ctx)
 
     LANE = lanes
     return lanes
