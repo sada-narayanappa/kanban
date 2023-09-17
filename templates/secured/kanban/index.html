@@ -1,0 +1,231 @@
+{% extends "common.html" %}
+{% block content %}
+
+<link rel="stylesheet" href="/static/kanban/styles.css" />
+<script src="/static/kanban/drag.js" defer></script>
+
+{% include "kanban/topmenu.html" %}
+<style>
+.widget {
+    background-color: #fff;
+}
+.widget-header {
+    float: right;
+    display: none;
+}
+.widget-content {
+    padding: 1px;
+    width: 100%;
+    height: 100%
+}
+
+#todo-lane .task {
+    background-color: blueviolet;
+}
+#todo-lane .task:before {
+  content: '\27f3';
+  color: green;
+  position: absolute;
+  right: 10;
+}
+
+#doing-lane .task {
+    background-color: orange;
+}
+#doing-lane .task:before {
+  content: '\22a0';
+  color: organge;
+  position: absolute;
+  right: 10;
+
+}
+
+
+#done-lane .task {
+    background-color: green;
+}
+#done-lane .task:before {
+  content: '\2714';
+  color: green;
+  position: absolute;
+  right: 10;
+}
+
+
+.inp11{
+    width:40%
+}
+.editing {
+    border: 0px solid #000 !important;
+    height: 100%;
+}
+.editkan{
+    width: 100%; height:100%;border:0px;
+}
+</style>
+
+<div class="board">
+<div  class="heading" style="padding: 4px;">
+<form id="form1" action="">
+<input class=inp11 type="text" id="project_title" required value="Project Title" >
+<input class=inp11 type="text" id="project_name"  required value="{{ user.username }}" placeholder="Project Fie"> 
+</form>
+</div>
+<div class="lanes" id="content">
+    <div class="swim-lane todo" id="todo-lane">
+        <div >
+            <b class="heading">Todo</b>
+            <a href=# class="heading" type="button" onclick="addTask('','todo-lane')">+</a>
+        </div>
+    </div>
+
+    <div class="swim-lane doing" id="doing-lane">
+        <div >
+            <b class="heading">Doing</b>
+            <a href=# class="heading" type="button" onclick="addTask('','doing-lane')">+</a>
+        </div>
+    </div>
+
+    <div class="swim-lane done" id="done-lane">
+        <div >
+            <b class="heading">Done</b>
+            <a href=# class="heading" type="button" onclick="addTask('','done-lane')">+</a>
+        </div>
+    </div>
+    </div>
+</div>
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  -->
+<script>
+const widget=`
+<div class="widget resizable" resizable>
+    <div class="widget-header">
+        <a onclick="" href=#>x</a>
+    </div>
+
+    <div class="widget-content">
+        <textarea class=editkan id="content"
+        onfocus='edit(this, 1)' onblur='edit(this, 0)'
+        ></textarea>
+    </div>
+</div>
+
+`
+function addTask(value="Enter notes", lane=$('#todoLane')[0]) {
+    if (typeof(lane) == 'string') {
+        lane = document.getElementById(lane)
+    }
+    value = value || "Enter Notes"
+
+    const newTask = document.createElement("div");
+    newTask.classList.add("task");
+    newTask.setAttribute("draggable", "true");
+    newTask.setAttribute("resizable", "true");
+    newTask.innerHTML = widget;
+
+    newTask.addEventListener("dragstart", () => {
+        newTask.classList.add("is-dragging");
+        });
+
+    newTask.addEventListener("dragend", () => {
+        newTask.classList.remove("is-dragging");
+        });
+
+    newTask.querySelector('#content').value = value
+
+    lane.appendChild(newTask);
+    $(newTask).resizable( {handles: 'n, s'} )
+}
+function clearKanban() {
+    const lanes = document.querySelectorAll(".task");
+    lanes.forEach((w) => {
+        w.remove()
+    });
+}
+function load() {
+    const lanes = document.querySelectorAll(".task");
+    lanes.forEach((w) => {
+        w.remove()
+    });
+}
+
+var LANE = null;
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+function save() {
+    var lanes = {
+        todo : [],
+        doing: [],
+        done : [],
+    }
+    let tasks = $('#todo-lane')[0].querySelectorAll(".task");
+    tasks.forEach((w) => {
+        lanes.todo.push(w.querySelector('#content').value)
+    });
+
+    tasks = $('#doing-lane')[0].querySelectorAll(".task");
+    tasks.forEach((w) => {
+        lanes.doing.push(w.querySelector('#content').value)
+    });
+    tasks = $('#done-lane')[0].querySelectorAll(".task");
+    tasks.forEach((w) => {
+        lanes.done.push(w.querySelector('#content').value)
+    });
+
+    lanes.title = $('#project_title')[0].value
+    lanes.name  = $('#project_name' )[0].value
+
+    var ctx = {
+        name: lanes.name,
+        contents: JSON.stringify(lanes, null, "  ")
+    }
+    console.log(lanes)
+    callws('/kanban/save/', "form1", [], ctx)
+
+    LANE = lanes
+    return lanes
+}
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+function loadCB(responseTxt, statusTxt, xhr, ctx={}, formData={}){
+    clearKanban()
+    var lanes = JSON.parse(responseTxt)
+    $('#project_title')[0].value = lanes.title
+    $('#project_name' )[0].value = lanes.name
+    for (var i in lanes.todo) {
+        addTask(lanes.todo[i], 'todo-lane')
+    }
+    for (var i in lanes.done) {
+        addTask(lanes.done[i], 'done-lane')
+    }
+    for (var i in lanes.doing) {
+        addTask(lanes.doing[i], 'doing-lane')
+    }
+    saveZZValues()
+}
+function load(kname) {
+    kname = kname || $('#project_name' )[0].value
+    if (!kname.trim()){
+        salert("Enter a project name")
+        return
+    }
+    var ctx = {name: kname}
+    callws('/kanban/get/', "", loadCB, ctx)
+}
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+function edit(ele, mode=0) {
+    if (mode) {
+        ele.classList.add("editing")
+    } else {
+        ele.classList.remove("editing")
+    }
+}
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+window.onload=function() {
+}
+$(document).ready(function() {
+    restoreZZValues()
+    load()
+})
+</script
+{% endblock %}
