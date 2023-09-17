@@ -13,7 +13,7 @@ def save( request, name, contents,**kwargs):
     if (name.endswith(".json")):
         name = name[:-5]
         
-    dst = f"{MBASE}/{name}.json"
+    dst = f"{MBASE}{name}.json"
     dstd= os.path.dirname(dst)
     if not os.path.exists(dstd ):
         os.makedirs(dstd)
@@ -27,11 +27,11 @@ def save( request, name, contents,**kwargs):
 def get( name, **kwargs):
     if (name.endswith(".json")):
         name = name[:-5]
-    dst = f"{MBASE}/{name}.json"
-    if not os.path.exists(os.path.dirname(dst) ):
-        os.makedirs(dst)
-    
-    ret = open(dst, "r").read()
+    dst = f"{MBASE}{name}.json"
+    if not os.path.exists(dst):
+        ret = "{}"
+    else:
+        ret = open(dst, "r").read()
     return ret  
 #------------------------------------------------------------------------------
 @webapi("/kanban/delete")
