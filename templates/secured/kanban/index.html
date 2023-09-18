@@ -77,7 +77,7 @@
 <input class=inp11 type="text" id="project_name"  required value="{{ user.username }}" placeholder="Project Fie"> 
 </form>
 </div>
-<div class="lanes" id="content">
+<div class="lanes" >
     <div class="swim-lane todo" id="todo-lane">
         <div >
             <b class="heading">Todo</b>
@@ -112,7 +112,7 @@ const widget=`
     </div>
 
     <div class="widget-content">
-        <textarea class=editkan id="content"
+        <textarea class="editkan content"  name="content"
         onfocus='edit(this, 1)' onblur='edit(this, 0)' onkeypress="handletb(event,this)" 
         ></textarea>
     </div>
@@ -142,7 +142,7 @@ function addTask(value="Enter notes", lane=$('#todoLane')[0]) {
         newTask.classList.remove("is-dragging");
         });
 
-    newTask.querySelector('#content').value = value
+    newTask.querySelector('.content').value = value
 
     lane.appendChild(newTask);
     $(newTask).resizable( {handles: 'n, s'} )
@@ -170,16 +170,16 @@ function save() {
     }
     let tasks = $('#todo-lane')[0].querySelectorAll(".task");
     tasks.forEach((w) => {
-        lanes.todo.push(w.querySelector('#content').value)
+        lanes.todo.push(w.querySelector('.content').value)
     });
 
     tasks = $('#doing-lane')[0].querySelectorAll(".task");
     tasks.forEach((w) => {
-        lanes.doing.push(w.querySelector('#content').value)
+        lanes.doing.push(w.querySelector('.content').value)
     });
     tasks = $('#done-lane')[0].querySelectorAll(".task");
     tasks.forEach((w) => {
-        lanes.done.push(w.querySelector('#content').value)
+        lanes.done.push(w.querySelector('.content').value)
     });
 
     lanes.title = $('#project_title')[0].value
