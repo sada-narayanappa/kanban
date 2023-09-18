@@ -68,13 +68,25 @@
     border:0px;
     padding: 2px;
 }
+
+.task-details{
+    display: none;
+}
+
 </style>
 
 <div class="board">
-<div  class="heading" style="padding: 4px;">
+<div  style="padding: 4px;">
 <form id="form1" action="">
-<input class=inp11 type="text" id="project_title" required value="Project Title" >
-<input class=inp11 type="text" id="project_name"  required value="{{ user.username }}" placeholder="Project Fie"> 
+    <div class="div1" style="width: 40%;">
+        <label class=label1 >Title</label>
+        <input class=input1 type="text" id="project_title" required value="Project Title" >
+    </div>
+    <div class="div1" style="width: 40%;">
+        <label class=label1 >Project Name</label>
+        <input class=input1 type="text" id="project_name" required value="{{ user.username }}" placeholder="ProjectName">
+    </div>
+    <span>Hello, {{ user.username }} </span>
 </form>
 </div>
 <div class="lanes" >
@@ -86,7 +98,7 @@
     </div>
 
     <div class="swim-lane doing" id="doing-lane">
-        <div >
+        <div>
             <b class="heading">Doing</b>
             <a href=# class="heading" type="button" onclick="addTask('','doing-lane')">+</a>
         </div>
@@ -109,6 +121,9 @@ const widget=`
 <div class="widget resizable" resizable>
     <div class="widget-header">
         <a onclick="" href=#>x</a>
+    </div>
+
+    <div class=task-details>
     </div>
 
     <div class="widget-content">
@@ -227,11 +242,13 @@ function load(kname) {
 var HEIGHT = 0
 function edit(ele, mode=0) {
     if (mode) {
+        $(ele.parentElement.parentElement.querySelector(".task-details")).fadeIn()
         ele.classList.add("editing")
         $(ele).height($(ele)[0].scrollHeight )
         if ( HEIGHT == 0)
             HEIGHT = $(ele).height() 
     } else {
+        $(ele.parentElement.parentElement.querySelector(".task-details")).fadeOut()
         ele.classList.remove("editing")
         $(ele).height(HEIGHT)
     }
@@ -262,7 +279,7 @@ function line(a,b) {
 window.onload=function() {
 }
 $(document).ready(function() {
-    restoreZZValues()
+    //restoreZZValues()
     load()
 })
 </script
