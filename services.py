@@ -29,7 +29,8 @@ def get( name, **kwargs):
         name = name[:-5]
     dst = f"{MBASE}{name}.json"
     if not os.path.exists(dst):
-        ret = "{}"
+        ret = {"name": name, "title": "New Kanban Board"}
+        ret = json.dumps(ret)
     else:
         ret = open(dst, "r").read()
     return ret  
